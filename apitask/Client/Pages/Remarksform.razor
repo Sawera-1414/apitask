@@ -1,0 +1,55 @@
+﻿<!-- RemarksForm.razor -->
+@page "/remarksform"
+@using Microsoft.AspNetCore.Components.Forms
+@inject AppDbContext DbContext
+
+<h3>Remarks Form</h3>
+
+<EditForm Model="@remarks" OnValidSubmit="SaveRemarks">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="userRemarks">User Remarks:</label>
+        <InputText id="userRemarks" @bind-Value="remarks.UserRemarks" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    private Remarks remarks = new Remarks();
+
+    private async Task SaveRemarks()
+    {
+        if (remarks.Id == 0)
+        {
+            // Add new remarks
+            DbContext.Remarks.Add(remarks);
+        }
+        else
+        {
+            // Edit existing remarks
+            var existingRemarks = DbContext.Remarks.Find(remarks.Id);
+            if (existingRemarks != null)
+            {
+                existingRemarks.UserRemarks = remarks.UserRemarks;
+            }
+        }
+
+        await DbContext.SaveChangesAsync();
+        NavigationManager.NavigateTo("/remarkslist");
+    }
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            // Load existing remarks for editing
+            remarks = await DbContext.Remarks.FindAsync(Id);
+        }
+    }
+}

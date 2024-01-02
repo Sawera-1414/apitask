@@ -1,0 +1,68 @@
+﻿@page "/userform"
+@using apitask.Shared.Models;
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.Forms
+@inject AppDbContext DbContext
+
+<h3>User Form</h3>
+
+<EditForm Model="@user" OnValidSubmit="SaveUser">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <InputText id="name" @bind-Value="user.Username" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="age">Age:</label>
+        <InputNumber id="age" @bind-Value="user.Age" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <InputText id="email" @bind-Value="user.Email" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    private User user = new User();
+
+    private async Task SaveUser()
+    {
+        if (user.Id == 0)
+        {
+            // Add new user
+            DbContext.Users.Add(user);
+        }
+        else
+        {
+            // Edit existing user
+            var existingUser = DbContext.Users.Find(user.Id);
+            if (existingUser != null)
+            {
+                existingUser.Name = user.Name;
+                existingUser.Age = user.Age;
+                existingUser.Email = user.Email;
+            }
+        }
+
+        await DbContext.SaveChangesAsync();
+        NavigationManager.NavigateTo("/userlist");
+    }
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            // Load existing user for editing
+            user = await DbContext.Users.FindAsync(Id);
+        }
+    }
+}

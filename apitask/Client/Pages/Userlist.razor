@@ -1,0 +1,58 @@
+﻿<!-- UserList.razor -->
+@page "/userlist"
+@using apitask.Shared.Models;
+@inject AppDbContext DbContext
+
+<h3>User List</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in users)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>@user.Age</td>
+                <td>@user.Email</td>
+                <td>
+                    <button @onclick="() => EditUser(user.Id)">Edit</button>
+                    <button @onclick="() => DeleteUser(user.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<User> users = new List<User>();
+
+    protected override void OnInitialized()
+    {
+        // Load users from the database
+        users = DbContext.Users.ToList();
+    }
+
+    private void EditUser(int userId)
+    {
+        NavigationManager.NavigateTo($"/userform/{userId}");
+    }
+
+    private async void DeleteUser(int userId)
+    {
+        var user = DbContext.Users.Find(userId);
+        if (user != null)
+        {
+            DbContext.Users.Remove(user);
+            await DbContext.SaveChangesAsync();
+            users.Remove(user);
+        }
+    }
+}
+

@@ -1,0 +1,73 @@
+﻿<!-- GameForm.razor -->
+@page "/gameform"
+@using Microsoft.AspNetCore.Components.Forms
+@inject AppDbContext DbContext
+
+<h3>Game Form</h3>
+
+<EditForm Model="@game" OnValidSubmit="SaveGame">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="gameTitle">Game Title:</label>
+        <InputText id="gameTitle" @bind-Value="game.GameTitle" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="gameType">Game Type:</label>
+        <InputText id="gameType" @bind-Value="game.GameType" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="releaseDate">Release Date:</label>
+        <InputDate id="releaseDate" @bind-Value="game.ReleaseDate" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="price">Price:</label>
+        <InputNumber id="price" @bind-Value="game.Price" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    private Game game = new Game();
+
+    private async Task SaveGame()
+    {
+        if (game.Id == 0)
+        {
+            // Add new game
+            DbContext.Games.Add(game);
+        }
+        else
+        {
+            // Edit existing game
+            var existingGame = DbContext.Games.Find(game.Id);
+            if (existingGame != null)
+            {
+                existingGame.GameTitle = game.GameTitle;
+                existingGame.GameType = game.GameType;
+                existingGame.ReleaseDate = game.ReleaseDate;
+                existingGame.Price = game.Price;
+            }
+        }
+
+        await DbContext.SaveChangesAsync();
+        NavigationManager.NavigateTo("/gamelist");
+    }
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            // Load existing game for editing
+            game = await DbContext.Games.FindAsync(Id);
+        }
+    }
+}
