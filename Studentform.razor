@@ -1,0 +1,59 @@
+﻿@page "/Studentform"
+@using apitask.Shared.Models;
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.Forms
+@inject AppDbContext DbContext
+
+<h3>User Form</h3>
+
+<EditForm Model="@formData" OnValidSubmit="SaveData">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <!-- Student Section -->
+    <h4>Student Details</h4>
+    <div class="form-group">
+        <label for="formData.StudentId">Student ID:</label>
+        <InputNumber @bind-Value="formData.StudentId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="formData.StudentName">Student Name:</label>
+        <InputText @bind-Value="formData.StudentName" class="form-control" />
+    </div>
+
+    <!-- Course Section -->
+    <h4>Course Details</h4>
+    <div class="form-group">
+        <label for="formData.CourseId">Course ID:</label>
+        <InputNumber @bind-Value="formData.CourseId" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="formData.CourseName">Course Name:</label>
+        <InputText @bind-Value="formData.CourseName" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="formData.Marks">Marks:</label>
+        <InputNumber @bind-Value="formData.Marks" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    private FormData formData = new FormData();
+
+    private async Task SaveData()
+    {
+        await DbContext.SaveChangesAsync();
+    }
+
+    private class FormData
+    {
+        public int StudentId { get; set; }
+        public string StudentName { get; set; }
+        public int CourseId { get; set; }
+        public string CourseName { get; set; }
+        public int Marks { get; set; }
+    }
+}
+
